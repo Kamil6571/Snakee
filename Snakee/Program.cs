@@ -1,14 +1,19 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Snakee
 {
     internal class Program
     {
+        private static string highScoreFilePath = "highscore.txt";
+        private static double frameRate = 1000 / 5.0; // Stała prędkość węża
+        private static ConsoleColor snakeColor = ConsoleColor.Yellow; // Stały kolor węża
 
         static void Main(string[] args)
         {
-          
             Console.CursorVisible = false;
             bool exit = false;
 
@@ -18,7 +23,8 @@ namespace Snakee
                 Console.Clear();
                 Console.WriteLine("=== Snake Game ===");
                 Console.WriteLine("1. Start Game");
-                Console.WriteLine("2. Exit");
+                Console.WriteLine("2. View High Score");
+                Console.WriteLine("3. Exit");
                 Console.Write("Select an option: ");
 
                 string input = Console.ReadLine();
@@ -31,6 +37,9 @@ namespace Snakee
                             StartGame();
                             break;
                         case 2:
+                            ViewHighScore();
+                            break;
+                        case 3:
                             exit = true;
                             break;
                         default:
@@ -50,7 +59,6 @@ namespace Snakee
             Console.Clear();
             Console.CursorVisible = false;
             bool exit = false;
-            double frameRate = 1000 / 5.0;
             DateTime lastDate = DateTime.Now;
             Meal meal = new Meal();
             Snake snake = new Snake();
@@ -79,11 +87,10 @@ namespace Snakee
                             snake.Direction = Direction.Down;
                             break;
                     }
-                } 
+                }
 
                 if ((DateTime.Now - lastDate).TotalMilliseconds >= frameRate)
                 {
-                    //game action
                     snake.Move();
 
                     if (meal.CurrentTarget.X == snake.HeadPosition.X
@@ -91,23 +98,51 @@ namespace Snakee
                     {
                         snake.EatMeal();
                         meal = new Meal();
-                        frameRate /= 1.1;
-                    } 
+                    }
 
                     if (snake.GameOver)
                     {
                         Console.Clear();
                         Console.WriteLine($"GAME OVER. YOUR SCORE: {snake.Length}");
-                        Thread.Sleep(2000); // Poczekaj 2 sekundy przed wyłączeniem
+                        SaveHighScore(snake.Length);
+                        Thread.Sleep(2000);
                         exit = true;
-                        break; // Wyjdź z pętli gry po zakończeniu
+                        break;
                     }
 
                     lastDate = DateTime.Now;
                 }
             }
 
-            Environment.Exit(0); // Wyłącz program po zakończeniu gry
+            Environment.Exit(0);
+        }
+
+        static void ViewHighScore()
+        {
+            Console.Clear();
+            Console.WriteLine("=== High Score ===");
+            int highScore = GetHighScore();
+            Console.WriteLine($"High Score: {highScore}");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+
+        static void SaveHighScore(int score)
+        {
+            File.WriteAllText(highScoreFilePath, score.ToString());
+        }
+
+        static int GetHighScore()
+        {
+            if (File.Exists(highScoreFilePath))
+            {
+                string content = File.ReadAllText(highScoreFilePath);
+                if (int.TryParse(content, out int score))
+                {
+                    return score;
+                }
+            }
+            return 0;
         }
     }
 }

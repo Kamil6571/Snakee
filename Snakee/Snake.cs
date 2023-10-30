@@ -12,6 +12,8 @@ namespace Snakee
         List<Coordinate> Tail { get; set; } = new List<Coordinate>();
         private bool outOfRange = false;
 
+        // Ustawienie stałego koloru węża na żółty
+        private ConsoleColor snakeColor = ConsoleColor.Yellow;
 
         public bool GameOver
         {
@@ -21,6 +23,7 @@ namespace Snakee
                   && c.Y == HeadPosition.Y).ToList().Count > 1) || outOfRange;
             }
         }
+
         public void EatMeal()
         {
             Length++;
@@ -28,7 +31,6 @@ namespace Snakee
 
         public void Move()
         {
-
             switch (Direction)
             {
                 case Direction.Left:
@@ -48,8 +50,10 @@ namespace Snakee
             try
             {
                 Console.SetCursorPosition(HeadPosition.X, HeadPosition.Y);
-                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = snakeColor; // Ustawienie stałego koloru węża
                 Console.Write(">");
+
+                // Przy powiększonym jedzeniu, wąż nie będzie tracić ogonów po zjedzeniu
                 Tail.Add(new Coordinate(HeadPosition.X, HeadPosition.Y));
                 if (Tail.Count > this.Length)
                 {
@@ -63,8 +67,6 @@ namespace Snakee
             {
                 outOfRange = true;
             }
-
-
         }
     }
 
